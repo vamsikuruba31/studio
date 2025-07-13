@@ -3,30 +3,25 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can only read/write their own document
+    // Users can only read and write their own data.
     match /users/{userId} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
     // Any authenticated user can read events and registrations.
-    // This allows for listing all events and checking registration status.
-    match /events/{eventId} {
+    match /{document=**} {
       allow read: if request.auth != null;
+    }
+    
+    // Any authenticated user can create an event.
+    match /events/{eventId} {
       allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.createdBy;
     }
 
+    // Users can only register for an event as themselves.
     match /registrations/{registrationId} {
-      // Allow reading all registrations for authenticated users.
-      // This is needed for functionality like checking if a user is registered for any event.
-      // More specific read rules could be implemented if needed, but this is a safe starting point.
-      allow read: if request.auth != null;
-
-      // A user can only create a registration for themselves.
-      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      
-      // Users can't update or delete registrations through the app.
-      allow update, delete: if false;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
   }
 }
