@@ -23,8 +23,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<CampusUser | null>(null);
   const [firebaseUser, setFirebaseUser] = useState<FirebaseUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setFirebaseUser(user);
@@ -45,6 +47,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const value = { user, firebaseUser, loading };
+
+  if (!mounted) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center">
+        <Spinner size="lg" />
+      </div>
+    );
+  }
 
   return (
     <AuthContext.Provider value={value}>
