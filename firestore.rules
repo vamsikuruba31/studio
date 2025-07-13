@@ -2,26 +2,11 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Users can only read and write their own data.
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
-    // Any authenticated user can read events and registrations.
-    match /{document=**} {
-      allow read: if request.auth != null;
-    }
     
-    // Any authenticated user can create an event.
-    match /events/{eventId} {
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.createdBy;
-    }
-
-    // Users can only register for an event as themselves.
-    match /registrations/{registrationId} {
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    // Allow any authenticated user to read/write to users, events, and registrations
+    match /{collection}/{document} 
+      where collection in ['users', 'events', 'registrations'] {
+      allow read, write: if request.auth != null;
     }
   }
 }
