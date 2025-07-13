@@ -8,14 +8,15 @@ import {
   serverTimestamp,
   where,
   documentId,
-  Timestamp
+  Timestamp,
+  orderBy
 } from 'firebase/firestore';
 import { db } from './config';
 import type { CampusEvent, Registration } from '../types';
 
 export const getEvents = async (): Promise<CampusEvent[]> => {
   const eventsCol = collection(db, 'events');
-  const q = query(eventsCol);
+  const q = query(eventsCol, orderBy('createdAt', 'desc'));
   const eventSnapshot = await getDocs(q);
   return eventSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CampusEvent));
 };
