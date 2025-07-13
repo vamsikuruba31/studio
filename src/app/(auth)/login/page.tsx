@@ -68,7 +68,7 @@ export default function LoginPage() {
             <Input id="password" type="password" {...register('password')} />
             {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
+          <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={loading}>
             {loading ? <Spinner size="sm" /> : 'Login'}
           </Button>
         </form>
