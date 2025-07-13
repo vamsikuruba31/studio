@@ -11,7 +11,7 @@ import { Spinner } from '@/components/Spinner';
 import { EventCard } from '@/components/events/EventCard';
 
 export function DashboardClient({ allEvents: initialAllEvents }: { allEvents: CampusEvent[] }) {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [recommendedEventsList, setRecommendedEventsList] = useState<CampusEvent[]>([]);
   const [allEvents, setAllEvents] = useState<CampusEvent[]>(initialAllEvents);
   const [loadingRecs, setLoadingRecs] = useState(true);
@@ -42,13 +42,13 @@ export function DashboardClient({ allEvents: initialAllEvents }: { allEvents: Ca
         } finally {
           setLoadingRecs(false);
         }
-      } else {
+      } else if (!authLoading) {
         setLoadingRecs(false);
       }
     }
-
+    
     fetchRecommendations();
-  }, [user]);
+  }, [user, authLoading]);
 
   return (
     <div className="space-y-12">

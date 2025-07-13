@@ -8,7 +8,7 @@ import { EventList } from '@/components/events/EventList';
 import { Spinner } from '@/components/Spinner';
 
 export default function MyEventsPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [registeredEvents, setRegisteredEvents] = useState<CampusEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -24,13 +24,16 @@ export default function MyEventsPage() {
           }
         } catch (error) {
           console.error("Failed to fetch registered events:", error);
+        } finally {
+            setLoading(false);
         }
+      } else if (!authLoading) {
+          setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchRegisteredEvents();
-  }, [user]);
+  }, [user, authLoading]);
 
   return (
     <div className="space-y-8">
