@@ -17,7 +17,7 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
   const [isRegistered, setIsRegistered] = useState(false);
   const [isCheckingRegistration, setIsCheckingRegistration] = useState(true);
   const [isRegistering, setIsRegistering] = useState(false);
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,17 +36,22 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
 
   useEffect(() => {
     const checkRegistration = async () => {
+      if (authLoading) {
+        // Wait for authentication to complete
+        return;
+      }
       if (user && event) {
         setIsCheckingRegistration(true);
         const registered = await checkIfRegistered(user.uid, event.id);
         setIsRegistered(registered);
         setIsCheckingRegistration(false);
       } else {
+        // Not logged in or event not loaded, so we're done checking
         setIsCheckingRegistration(false);
       }
     };
     checkRegistration();
-  }, [user, event]);
+  }, [user, event, authLoading]);
   
   const handleRegister = async () => {
     if (!user || !event) return;
@@ -108,8 +113,8 @@ export default function EventDetailPage({ params }: { params: { id: string } }) 
             ) : isRegistered ? (
                 <Button className="w-full md:w-auto" size="lg" variant="secondary" disabled><CheckCircle className="mr-2 h-4 w-4" />Registered</Button>
             ) : (
-                <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground md:w-auto" size="lg" onClick={handleRegister} disabled={isRegistering}>
-                    {isRegistering ? <Spinner size="sm" /> : 'Register for this Event'}
+                <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground md:w-auto" size="lg" onClick={handleRegister} disabled={isRegistering || !user}>
+                    {isRegistering ? <Spinner size="sm" /> : (user ? 'Register for this Event' : 'Login to Register')}
                 </Button>
             )}
           </div>
