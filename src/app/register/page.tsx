@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signUp } = useAuth();
+  const { signUp, signOut } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -30,6 +30,7 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await signUp(email, password);
+      await signOut(); // Sign out the user immediately
       toast({
         title: "Account Created",
         description: "Please log in to continue.",
