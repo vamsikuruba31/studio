@@ -22,7 +22,6 @@ export const addEvent = async (eventData: Omit<EventData, 'id' | 'createdAt' | '
         const eventCollection = collection(db, 'events');
         await addDoc(eventCollection, {
             ...eventData,
-            date: Timestamp.fromDate(eventData.date),
             createdAt: serverTimestamp(),
         });
     } catch (error) {

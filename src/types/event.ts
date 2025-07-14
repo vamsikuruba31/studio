@@ -4,7 +4,7 @@ export interface EventData {
   id: string;
   title: string;
   description: string;
-  date: Timestamp;
+  date: Timestamp | Date;
   time: string;
   department: string;
   tags: string[];
