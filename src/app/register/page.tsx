@@ -15,6 +15,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
 import { addUser } from "@/lib/firebase/firestore";
@@ -32,6 +39,14 @@ export default function RegisterPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!year) {
+      toast({
+        title: "Incomplete Form",
+        description: "Please select your year.",
+        variant: "destructive",
+      });
+      return;
+    }
     setLoading(true);
     try {
       const userCredential = await signUp(email, password);
@@ -105,14 +120,17 @@ export default function RegisterPage() {
               </div>
                <div className="grid gap-2">
                 <Label htmlFor="year">Year</Label>
-                <Input
-                  id="year"
-                  type="number"
-                  placeholder="e.g. 2024"
-                  required
-                  value={year}
-                  onChange={(e) => setYear(e.target.value)}
-                />
+                <Select onValueChange={setYear} value={year}>
+                  <SelectTrigger id="year">
+                    <SelectValue placeholder="Select your year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1">1st Year</SelectItem>
+                    <SelectItem value="2">2nd Year</SelectItem>
+                    <SelectItem value="3">3rd Year</SelectItem>
+                    <SelectItem value="4">4th Year</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
