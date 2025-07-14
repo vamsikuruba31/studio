@@ -52,28 +52,8 @@ export default function AddEventPage() {
         setLoading(false);
         return;
     }
-    if (!title.trim()) {
-        toast({ title: "Validation Error", description: "Please enter an event title.", variant: "destructive" });
-        setLoading(false);
-        return;
-    }
-    if (!description.trim()) {
-        toast({ title: "Validation Error", description: "Please enter an event description.", variant: "destructive" });
-        setLoading(false);
-        return;
-    }
-    if (!date) {
-        toast({ title: "Validation Error", description: "Please select an event date.", variant: "destructive" });
-        setLoading(false);
-        return;
-    }
-    if (!time) {
-        toast({ title: "Validation Error", description: "Please select an event time.", variant: "destructive" });
-        setLoading(false);
-        return;
-    }
-    if (!department) {
-        toast({ title: "Validation Error", description: "Please select a department.", variant: "destructive" });
+    if (!title.trim() || !description.trim() || !date || !time || !department) {
+        toast({ title: "Validation Error", description: "Please fill out all required fields.", variant: "destructive" });
         setLoading(false);
         return;
     }
@@ -82,7 +62,7 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       
       if (posterFile) {
-        const posterPath = `events/${Date.now()}_${posterFile.name}`;
+        const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
         posterUrl = await uploadFile(posterFile, posterPath);
       }
       

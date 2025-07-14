@@ -14,12 +14,9 @@ export const uploadFile = async (file: File, path: string): Promise<string> => {
   }
   const storageRef = ref(storage, path);
   
-  // Step 1: Upload the file
   await uploadBytes(storageRef, file);
   
-  // Step 2: Get the download URL
   const downloadURL = await getDownloadURL(storageRef);
   
-  // Step 3: Return the URL
   return downloadURL;
 };

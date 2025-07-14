@@ -31,9 +31,12 @@ export const addEvent = async (eventData: EventDataInput) => {
         const eventCollection = collection(db, 'events');
         const dataToSave = {
             ...eventData,
-            date: Timestamp.fromDate(combinedDate), // Convert to Firestore Timestamp here
+            date: Timestamp.fromDate(combinedDate), 
             createdAt: serverTimestamp(),
         };
+        // Remove time property as it's merged into date
+        delete (dataToSave as Partial<EventDataInput>).time;
+
         await addDoc(eventCollection, dataToSave);
     } catch (error) {
         console.error('Error adding event to Firestore: ', error);
