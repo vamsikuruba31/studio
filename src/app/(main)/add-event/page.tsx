@@ -62,7 +62,12 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
-        posterUrl = await uploadFile(posterFile, posterPath);
+        const uploadedUrl = await uploadFile(posterFile, posterPath);
+        if (uploadedUrl) {
+          posterUrl = uploadedUrl;
+        } else {
+           throw new Error("File upload failed, but no error was thrown.");
+        }
       }
       
       const [hours, minutes] = time.split(':');
@@ -72,7 +77,7 @@ export default function AddEventPage() {
       const eventData = {
         title,
         description,
-        date: eventDate,
+        date: eventDate, // Pass the JS Date object directly
         time,
         department,
         posterUrl,
