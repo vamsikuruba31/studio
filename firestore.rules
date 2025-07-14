@@ -1,29 +1,22 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Users can only read and update their own profile.
-    // Any authenticated user can read public user data (name, department).
+    // Users:
+    // - Authenticated users can create their own document.
+    // - Users can only read/update their own data.
     match /users/{userId} {
-      allow read: if request.auth != null;
-      allow create, update: if request.auth.uid == userId;
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
     }
 
-    // Any authenticated user can read and create events.
-    // Only the user who created the event can update or delete it.
+    // Events:
+    // - Anyone can read events.
+    // - Only admins can create, update, or delete events.
     match /events/{eventId} {
-      allow read, create: if request.auth != null;
-      allow update, delete: if request.auth.uid == resource.data.createdBy;
-    }
-
-    // Registrations can be created by any authenticated user.
-    // Users can only view their own registrations.
-    // Users can only delete their own registrations.
-    match /registrations/{registrationId} {
-        allow create: if request.auth != null;
-        allow read, delete: if request.auth.uid == resource.data.userId;
+      allow read: if true;
+      allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
     }
   }
 }
