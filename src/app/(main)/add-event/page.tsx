@@ -22,7 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, X, Upload } from "lucide-react";
+import { CalendarIcon, X, Upload, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -31,6 +31,8 @@ import { addEvent } from "@/lib/firebase/firestore";
 import { uploadFile } from "@/lib/firebase/storage";
 import type { EventDataInput } from "@/types/event";
 import { Card, CardContent } from "@/components/ui/card";
+import { suggestEventCaption } from "@/ai/flows/suggest-caption-flow";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export default function AddEventPage() {
   const { user } = useAuth();
@@ -47,6 +49,9 @@ export default function AddEventPage() {
   
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [posterPreview, setPosterPreview] = useState<string | null>(null);
+
+  const [generatingCaption, setGeneratingCaption] = useState(false);
+  const [suggestedCaption, setSuggestedCaption] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -77,6 +82,32 @@ export default function AddEventPage() {
       }
     };
   }, [posterPreview]);
+  
+  const handleSuggestCaption = async () => {
+    if (!title && !description) {
+        toast({
+            title: "Cannot generate caption",
+            description: "Please enter a title and description first.",
+            variant: "destructive",
+        });
+        return;
+    }
+    setGeneratingCaption(true);
+    setSuggestedCaption("");
+    try {
+        const result = await suggestEventCaption({ title, description });
+        setSuggestedCaption(result.caption);
+    } catch (error) {
+        console.error("Error generating caption:", error);
+        toast({
+            title: "Caption Generation Failed",
+            description: "There was an error generating the caption. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setGeneratingCaption(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +134,7 @@ export default function AddEventPage() {
             console.error("🔥 Poster Upload Failed:", err);
             toast({
                 title: "Poster Upload Failed",
-                description: err.message || "An unexpected error occurred during upload. Please check the console and your storage rules.",
+                description: err.message || "An unexpected error occurred during upload. This might be a CORS issue. Please check the console.",
                 variant: "destructive",
             });
             setLoading(false);
@@ -160,6 +191,23 @@ export default function AddEventPage() {
             <Label htmlFor="description">Event Description</Label>
             <Textarea id="description" placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
+        
+        <div className="space-y-4">
+            <Button type="button" variant="outline" onClick={handleSuggestCaption} disabled={generatingCaption}>
+                {generatingCaption ? <Spinner size="sm" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                Suggest a Catchy Caption
+            </Button>
+            {suggestedCaption && (
+                <Alert>
+                    <Sparkles className="h-4 w-4" />
+                    <AlertTitle>AI Suggestion</AlertTitle>
+                    <AlertDescription className="mt-2">
+                        <p className="text-foreground">{suggestedCaption}</p>
+                    </AlertDescription>
+                </Alert>
+            )}
+        </div>
+
 
         <div className="space-y-2">
             <Label>Event Poster</Label>
@@ -171,8 +219,8 @@ export default function AddEventPage() {
                         src={posterPreview}
                         alt="Poster preview"
                         fill
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="rounded-md object-contain"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                          <Button type="button" size="icon" variant="destructive" onClick={handleRemovePoster}>
