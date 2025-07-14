@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -45,18 +45,38 @@ export default function AddEventPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
     if (!user) {
-        toast({ title: "Error", description: "You must be logged in to add an event.", variant: "destructive" });
+        toast({ title: "Authentication Error", description: "You must be logged in to add an event.", variant: "destructive" });
+        setLoading(false);
         return;
     }
-
-    if (!title || !description || !date || !time || !department) {
-        toast({ title: "Error", description: "Please fill out all required fields.", variant: "destructive" });
+    if (!title.trim()) {
+        toast({ title: "Validation Error", description: "Please enter an event title.", variant: "destructive" });
+        setLoading(false);
         return;
     }
-
-    setLoading(true);
+    if (!description.trim()) {
+        toast({ title: "Validation Error", description: "Please enter an event description.", variant: "destructive" });
+        setLoading(false);
+        return;
+    }
+    if (!date) {
+        toast({ title: "Validation Error", description: "Please select an event date.", variant: "destructive" });
+        setLoading(false);
+        return;
+    }
+    if (!time) {
+        toast({ title: "Validation Error", description: "Please select an event time.", variant: "destructive" });
+        setLoading(false);
+        return;
+    }
+    if (!department) {
+        toast({ title: "Validation Error", description: "Please select a department.", variant: "destructive" });
+        setLoading(false);
+        return;
+    }
 
     try {
       let posterUrl = "https://placehold.co/600x400.png";
@@ -88,8 +108,8 @@ export default function AddEventPage() {
     } catch (error: any) {
       console.error("Error adding event:", error);
       toast({
-        title: "Error adding event",
-        description: error.message || "An unexpected error occurred.",
+        title: "Error Adding Event",
+        description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -103,12 +123,12 @@ export default function AddEventPage() {
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-2">
             <Label htmlFor="title">Event Title</Label>
-            <Input id="title" placeholder="e.g., AI for Beginners" value={title} onChange={(e) => setTitle(e.target.value)} required />
+            <Input id="title" placeholder="e.g., AI for Beginners" value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
         <div className="space-y-2">
             <Label htmlFor="description">Event Description</Label>
-            <Textarea id="description" placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} required />
+            <Textarea id="description" placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -140,14 +160,14 @@ export default function AddEventPage() {
             </div>
             <div className="space-y-2">
                 <Label htmlFor="time">Event Time</Label>
-                <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
+                <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} />
             </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
                 <Label>Department</Label>
-                <Select onValueChange={setDepartment} value={department} required>
+                <Select onValueChange={setDepartment} value={department}>
                     <SelectTrigger>
                         <SelectValue placeholder="Select a department" />
                     </SelectTrigger>
@@ -182,7 +202,7 @@ export default function AddEventPage() {
             />
         </div>
 
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" disabled={loading} className="w-full sm:w-auto">
             {loading ? <Spinner size="sm" /> : "Add Event"}
         </Button>
       </form>
