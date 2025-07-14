@@ -18,8 +18,7 @@ export interface EventData {
 export interface EventDataInput {
   title: string;
   description: string;
-  date: Date;
-  time: string;
+  date: Date; // Combined date and time from the form
   department: string;
   tags: string[];
   createdBy: string;
