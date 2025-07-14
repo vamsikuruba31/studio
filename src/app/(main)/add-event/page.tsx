@@ -60,24 +60,24 @@ export default function AddEventPage() {
         return;
     }
 
-    let posterUrl = "https://placehold.co/600x400.png";
+    try {
+      let posterUrl = "https://placehold.co/600x400.png";
 
-    if (posterFile) {
+      if (posterFile) {
         try {
             const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
             posterUrl = await uploadFile(posterFile, posterPath);
         } catch (err: any) {
             toast({
                 title: "Poster Upload Failed",
-                description: err.message || "An unexpected error occurred. Please try again.",
+                description: err.message || "An unexpected error occurred during upload. Please try again.",
                 variant: "destructive",
             });
             setLoading(false);
             return;
         }
-    }
+      }
 
-    try {
       const [hours, minutes] = time.split(':').map(Number);
       const combinedDate = new Date(date);
       combinedDate.setHours(hours, minutes, 0, 0);
