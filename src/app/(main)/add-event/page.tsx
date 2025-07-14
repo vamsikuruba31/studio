@@ -63,8 +63,9 @@ export default function AddEventPage() {
       
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
+        // This will now receive the correct URL from the fixed uploadFile function
         const uploadedUrl = await uploadFile(posterFile, posterPath);
-        posterUrl = uploadedUrl; // This will now receive the correct URL
+        posterUrl = uploadedUrl;
       }
       
       const [hours, minutes] = time.split(':');
