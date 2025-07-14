@@ -1,9 +1,8 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,15 +21,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, X, Upload, Sparkles } from "lucide-react";
+import { CalendarIcon, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
-import { uploadFile } from "@/lib/firebase/storage";
 import type { EventDataInput } from "@/types/event";
-import { Card, CardContent } from "@/components/ui/card";
 import { suggestEventCaption } from "@/ai/flows/suggest-caption-flow";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -47,41 +44,8 @@ export default function AddEventPage() {
   const [department, setDepartment] = useState("");
   const [tags, setTags] = useState("");
   
-  const [posterFile, setPosterFile] = useState<File | null>(null);
-  const [posterPreview, setPosterPreview] = useState<string | null>(null);
-
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [suggestedCaption, setSuggestedCaption] = useState("");
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        toast({
-          title: "File Too Large",
-          description: "Please select an image smaller than 5MB.",
-          variant: "destructive",
-        });
-        return;
-      }
-      setPosterFile(file);
-      setPosterPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const handleRemovePoster = () => {
-    setPosterFile(null);
-    setPosterPreview(null);
-  }
-
-  // Cleanup object URL
-  useEffect(() => {
-    return () => {
-      if (posterPreview) {
-        URL.revokeObjectURL(posterPreview);
-      }
-    };
-  }, [posterPreview]);
   
   const handleSuggestCaption = async () => {
     if (!title && !description) {
@@ -124,23 +88,8 @@ export default function AddEventPage() {
     setLoading(true);
 
     try {
-      let posterUrl = "https://placehold.co/600x400.png";
-
-      if (posterFile) {
-        try {
-            const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
-            posterUrl = await uploadFile(posterFile, posterPath);
-        } catch (err: any) {
-            console.error("🔥 Poster Upload Failed:", err);
-            toast({
-                title: "Poster Upload Failed",
-                description: err.message || "An unexpected error occurred during upload. This might be a CORS issue. Please check the console.",
-                variant: "destructive",
-            });
-            setLoading(false);
-            return;
-        }
-      }
+      // Use a placeholder URL since file upload is disabled due to CORS
+      const posterUrl = "https://placehold.co/600x400.png";
 
       const [hours, minutes] = time.split(':').map(Number);
       const combinedDate = new Date(date);
@@ -206,43 +155,6 @@ export default function AddEventPage() {
                     </AlertDescription>
                 </Alert>
             )}
-        </div>
-
-
-        <div className="space-y-2">
-            <Label>Event Poster</Label>
-             <Card>
-                <CardContent className="p-4">
-                  {posterPreview ? (
-                    <div className="relative group w-full aspect-video">
-                      <Image
-                        src={posterPreview}
-                        alt="Poster preview"
-                        fill
-                        className="rounded-md object-contain"
-                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                         <Button type="button" size="icon" variant="destructive" onClick={handleRemovePoster}>
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove poster</span>
-                         </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <label htmlFor="poster" className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted transition-colors">
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
-                            <p className="mb-2 text-sm text-muted-foreground">
-                                <span className="font-semibold">Click to upload</span> or drag and drop
-                            </p>
-                            <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 5MB)</p>
-                        </div>
-                         <Input id="poster" type="file" className="hidden" accept="image/png, image/jpeg, image/gif" onChange={handleFileChange} />
-                    </label>
-                  )}
-                </CardContent>
-            </Card>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
