@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
 import { uploadFile } from "@/lib/firebase/storage";
+import type { EventDataInput } from "@/types/event";
 
 export default function AddEventPage() {
   const { user } = useAuth();
@@ -62,11 +63,11 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       
       if (posterFile) {
-        const posterPath = `events/${Date.now()}_${posterFile.name}`;
+        const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
         posterUrl = await uploadFile(posterFile, posterPath);
       }
       
-      const eventData = {
+      const eventData: EventDataInput = {
         title,
         description,
         date, 
