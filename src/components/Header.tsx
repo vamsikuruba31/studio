@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Building, LogOut, User } from "lucide-react";
+import { Building, LogOut, PlusCircle } from "lucide-react";
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -40,7 +40,14 @@ export function Header() {
         </Link>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-            {/* We will add navigation links here later */}
+             {user && (
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/add-event">
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                  Add Event
+                </Link>
+              </Button>
+            )}
           </nav>
           {user && (
             <DropdownMenu>
