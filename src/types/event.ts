@@ -1,17 +1,17 @@
 
 import type { Timestamp } from 'firebase/firestore';
 
-// This is the shape of the data stored in Firestore
+// This is the shape of the data stored and retrieved
 export interface EventData {
   id: string;
   title: string;
   description: string;
-  date: Timestamp; // Combined date and time
+  date: Date; // Use JS Date object in the application
   department: string;
   tags: string[];
   posterUrl: string;
   createdBy: string;
-  createdAt: Timestamp;
+  createdAt: Date;
 }
 
 // This is the shape of the data passed from the form to the addEvent function

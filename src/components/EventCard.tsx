@@ -15,13 +15,14 @@ import { CalendarDays, Tag, Clock } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface EventCardProps {
-  event: EventData & { time?: string }; // time is optional and for display only
+  event: EventData;
 }
 
 export function EventCard({ event }: EventCardProps) {
     
-  const eventDate = event.date ? event.date.toDate() : new Date();
-  const displayTime = event.time || eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  // event.date is now a JS Date object
+  const eventDate = event.date; 
+  const displayTime = eventDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   return (
     <Card className="flex flex-col">

@@ -40,23 +40,25 @@ export const getEvents = async (): Promise<EventData[]> => {
         const eventsCollection = collection(db, 'events');
         const q = query(eventsCollection, orderBy('date', 'asc'));
         const querySnapshot = await getDocs(q);
+
         const events = querySnapshot.docs.map(doc => {
             const data = doc.data();
-            // This is a type guard to ensure date is a Timestamp
-            const eventDate = data.date instanceof Timestamp ? data.date : new Timestamp(0,0);
+            // Firestore timestamps need to be converted to JS Date objects
+            const date = (data.date as Timestamp).toDate();
             return {
                 id: doc.id,
-                ...data,
-                date: eventDate,
-            } as EventData
-        });
-        // Now, we need to correctly handle the time display on the frontend
-        return events.map(event => {
-            const date = event.date.toDate();
-            const time = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-            return { ...event, time }; // This is for display only, not part of EventData
+                title: data.title,
+                description: data.description,
+                date: date, // Keep as a Date object
+                department: data.department,
+                tags: data.tags,
+                posterUrl: data.posterUrl,
+                createdBy: data.createdBy,
+                createdAt: (data.createdAt as Timestamp).toDate(),
+            } as EventData;
         });
 
+        return events;
     } catch (error) {
         console.error('Error getting events: ', error);
         throw new Error('Could not fetch events.');
