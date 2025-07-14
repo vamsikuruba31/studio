@@ -62,12 +62,7 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
-        const uploadedUrl = await uploadFile(posterFile, posterPath);
-        if (uploadedUrl) {
-            posterUrl = uploadedUrl;
-        } else {
-            throw new Error("Failed to upload poster. Please try again.");
-        }
+        posterUrl = await uploadFile(posterFile, posterPath);
       }
       
       const [hours, minutes] = time.split(':');
