@@ -15,7 +15,9 @@ export async function uploadFile(file: File, path: string): Promise<string> {
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
     } catch (error: any) {
-        console.error("🔥 uploadFile error:", error.code, error.message);
-        throw new Error(`Image upload failed: ${error.code || 'Please try again.'}`);
+        console.error("🔥 Firebase Storage Upload Error:", error);
+        // Provide a more specific error message if possible
+        const message = error.code ? `Storage Error: ${error.code}` : "An unexpected error occurred during upload.";
+        throw new Error(message);
     }
 }

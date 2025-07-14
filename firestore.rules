@@ -1,13 +1,15 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
+    
     // Users can only read and write their own data
     match /users/{userId} {
       allow read, update, delete: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null;
     }
-    
-    // Anyone can read events, but only admins can write them
+
+    // Events can be read by anyone, but only created, updated, or deleted by an admin
     match /events/{eventId} {
       allow read: if true;
       allow create, update, delete: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
