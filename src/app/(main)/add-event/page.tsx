@@ -1,8 +1,9 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +22,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, X, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -29,6 +30,7 @@ import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
 import { uploadFile } from "@/lib/firebase/storage";
 import type { EventDataInput } from "@/types/event";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function AddEventPage() {
   const { user } = useAuth();
@@ -42,23 +44,53 @@ export default function AddEventPage() {
   const [time, setTime] = useState("");
   const [department, setDepartment] = useState("");
   const [tags, setTags] = useState("");
+  
   const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterPreview, setPosterPreview] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        toast({
+          title: "File Too Large",
+          description: "Please select an image smaller than 5MB.",
+          variant: "destructive",
+        });
+        return;
+      }
+      setPosterFile(file);
+      setPosterPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleRemovePoster = () => {
+    setPosterFile(null);
+    setPosterPreview(null);
+  }
+
+  // Cleanup object URL
+  useEffect(() => {
+    return () => {
+      if (posterPreview) {
+        URL.revokeObjectURL(posterPreview);
+      }
+    };
+  }, [posterPreview]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-
+    
     if (!user) {
         toast({ title: "Authentication Error", description: "You must be logged in to add an event.", variant: "destructive" });
-        setLoading(false);
         return;
     }
     
     if (!title.trim() || !description.trim() || !date || !time || !department) {
         toast({ title: "Validation Error", description: "Please fill out all required fields, including date and time.", variant: "destructive" });
-        setLoading(false);
         return;
     }
+    setLoading(true);
 
     try {
       let posterUrl = "https://placehold.co/600x400.png";
@@ -112,6 +144,8 @@ export default function AddEventPage() {
     }
   };
 
+  const isFormInvalid = !title.trim() || !description.trim() || !date || !time || !department;
+
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-4xl font-headline mb-4">Add New Event</h1>
@@ -124,6 +158,42 @@ export default function AddEventPage() {
         <div className="space-y-2">
             <Label htmlFor="description">Event Description</Label>
             <Textarea id="description" placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} />
+        </div>
+
+        <div className="space-y-2">
+            <Label>Event Poster</Label>
+             <Card>
+                <CardContent className="p-4">
+                  {posterPreview ? (
+                    <div className="relative group w-full aspect-video">
+                      <Image
+                        src={posterPreview}
+                        alt="Poster preview"
+                        layout="fill"
+                        objectFit="contain"
+                        className="rounded-md"
+                      />
+                      <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                         <Button type="button" size="icon" variant="destructive" onClick={handleRemovePoster}>
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove poster</span>
+                         </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label htmlFor="poster" className="flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted transition-colors">
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-4 text-muted-foreground" />
+                            <p className="mb-2 text-sm text-muted-foreground">
+                                <span className="font-semibold">Click to upload</span> or drag and drop
+                            </p>
+                            <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 5MB)</p>
+                        </div>
+                         <Input id="poster" type="file" className="hidden" accept="image/png, image/jpeg, image/gif" onChange={handleFileChange} />
+                    </label>
+                  )}
+                </CardContent>
+            </Card>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -182,25 +252,12 @@ export default function AddEventPage() {
             </div>
         </div>
 
-        <div className="space-y-2">
-            <Label htmlFor="poster">Event Poster (Optional)</Label>
-            <Input 
-                id="poster"
-                type="file" 
-                accept="image/*"
-                onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) {
-                        setPosterFile(file);
-                    }
-                }}
-            />
-        </div>
-
-        <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+        <Button type="submit" disabled={loading || isFormInvalid} className="w-full sm:w-auto">
             {loading ? <Spinner size="sm" /> : "Add Event"}
         </Button>
       </form>
     </div>
   );
 }
+
+    
