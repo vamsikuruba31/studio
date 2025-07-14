@@ -62,10 +62,12 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
-        // uploadFile now correctly handles the possibility of a null file
         const uploadedUrl = await uploadFile(posterFile, posterPath);
         if (uploadedUrl) {
             posterUrl = uploadedUrl;
+        } else {
+            // Handle case where upload fails but doesn't throw
+            throw new Error("Failed to upload poster. Please try again.");
         }
       }
       
