@@ -46,7 +46,7 @@ const eventFormSchema = z.object({
   time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)."),
   department: z.string().min(1, "Please select a department."),
   tags: z.string().optional(),
-  poster: z.instanceof(File).refine(file => file.size > 0, "A poster image is required."),
+  poster: z.instanceof(File).optional(),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -75,10 +75,12 @@ export default function AddEventPage() {
     }
     setLoading(true);
     try {
-      const posterPath = `events/${Date.now()}_${data.poster.name}`;
-      const posterUrl = await uploadFile(data.poster, posterPath);
+      let posterUrl = "https://placehold.co/600x400.png";
+      if (data.poster && data.poster.size > 0) {
+        const posterPath = `events/${Date.now()}_${data.poster.name}`;
+        posterUrl = await uploadFile(data.poster, posterPath);
+      }
 
-      // Combine date and time into a single Date object
       const [hours, minutes] = data.time.split(':');
       const eventDate = new Date(data.date);
       eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
@@ -86,7 +88,7 @@ export default function AddEventPage() {
       const eventData = {
         title: data.title,
         description: data.description,
-        date: eventDate, // This is now a correct Date object
+        date: eventDate,
         time: data.time,
         department: data.department,
         posterUrl,
@@ -245,7 +247,7 @@ export default function AddEventPage() {
                 name="poster"
                 render={({ field: { onChange, value, ...rest } }) => (
                 <FormItem>
-                    <FormLabel>Event Poster</FormLabel>
+                    <FormLabel>Event Poster (Optional)</FormLabel>
                     <FormControl>
                     <Input 
                         type="file" 
@@ -271,5 +273,3 @@ export default function AddEventPage() {
     </div>
   );
 }
-
-    
