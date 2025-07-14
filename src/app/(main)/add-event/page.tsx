@@ -58,12 +58,19 @@ export default function AddEventPage() {
         return;
     }
 
+    console.log("Starting event submission process...");
+
     try {
       let posterUrl = "https://placehold.co/600x400.png";
       
       if (posterFile) {
-        const posterPath = `posters/test-upload.jpg`;
+        console.log("Poster file found. Attempting to upload:", posterFile.name);
+        const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
+        console.log("Uploading to path:", posterPath);
         posterUrl = await uploadFile(posterFile, posterPath, user);
+        console.log("Upload successful. Poster URL:", posterUrl);
+      } else {
+        console.log("No poster file found. Using default placeholder.");
       }
       
       const eventData = {
@@ -77,7 +84,9 @@ export default function AddEventPage() {
         tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       };
       
+      console.log("Attempting to add event to Firestore with data:", eventData);
       await addEvent(eventData);
+      console.log("Event added to Firestore successfully.");
 
       toast({
         title: "Success!",
@@ -86,13 +95,19 @@ export default function AddEventPage() {
       router.push("/dashboard");
 
     } catch (error: any) {
-      console.error("Error adding event:", error);
+      console.error("--- DEBUG: An error occurred in handleSubmit ---");
+      console.error("Error Name:", error.name);
+      console.error("Error Message:", error.message);
+      console.error("Error Code:", error.code);
+      console.error("Full Error Object:", error);
+      
       toast({
         title: "Error Adding Event",
         description: error.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
+        console.log("--- DEBUG: handleSubmit finally block reached ---");
         setLoading(false);
     }
   };
