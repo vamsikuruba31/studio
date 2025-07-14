@@ -1,7 +1,8 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
@@ -21,12 +22,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Sparkles } from "lucide-react";
+import { CalendarIcon, Sparkles, Upload, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
+import { uploadFile } from "@/lib/firebase/storage";
 import type { EventDataInput } from "@/types/event";
 import { suggestEventCaption } from "@/ai/flows/suggest-caption-flow";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -43,10 +45,33 @@ export default function AddEventPage() {
   const [time, setTime] = useState("");
   const [department, setDepartment] = useState("");
   const [tags, setTags] = useState("");
-  const [posterUrl, setPosterUrl] = useState("");
   
+  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [posterPreview, setPosterPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [suggestedCaption, setSuggestedCaption] = useState("");
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPosterFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPosterPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removePoster = () => {
+    setPosterFile(null);
+    setPosterPreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
   
   const handleSuggestCaption = async () => {
     if (!title && !description) {
@@ -83,13 +108,18 @@ export default function AddEventPage() {
     }
     
     if (!title.trim() || !description.trim() || !date || !time || !department) {
-        toast({ title: "Validation Error", description: "Please fill out all required fields, including date and time.", variant: "destructive" });
+        toast({ title: "Validation Error", description: "Please fill out all required fields.", variant: "destructive" });
         return;
     }
     setLoading(true);
 
     try {
-      const finalPosterUrl = posterUrl.trim() ? posterUrl : "https://placehold.co/600x400.png";
+      let finalPosterUrl = "https://placehold.co/600x400.png";
+      
+      if (posterFile) {
+        const filePath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
+        finalPosterUrl = await uploadFile(posterFile, filePath);
+      }
 
       const [hours, minutes] = time.split(':').map(Number);
       const combinedDate = new Date(date);
@@ -158,11 +188,50 @@ export default function AddEventPage() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="posterUrl">Event Poster URL</Label>
-          <Input id="posterUrl" placeholder="https://example.com/poster.png" value={posterUrl} onChange={(e) => setPosterUrl(e.target.value)} />
-           <p className="text-sm text-muted-foreground">
-            Paste a link to an image. If left blank, a default image will be used.
-          </p>
+            <Label>Event Poster</Label>
+            <div className="p-4 border-2 border-dashed border-border rounded-lg text-center">
+            {posterPreview ? (
+                <div className="relative group mx-auto max-w-sm">
+                <Image
+                    src={posterPreview}
+                    alt="Event poster preview"
+                    width={600}
+                    height={400}
+                    className="rounded-md object-contain"
+                />
+                <Button
+                    type="button"
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={removePoster}
+                >
+                    <X className="h-4 w-4" />
+                </Button>
+                </div>
+            ) : (
+                <div className="flex flex-col items-center space-y-2">
+                <Upload className="h-12 w-12 text-muted-foreground" />
+                <Label
+                    htmlFor="poster-upload"
+                    className="cursor-pointer text-primary underline"
+                >
+                    Upload an image
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                    PNG, JPG, GIF up to 5MB
+                </p>
+                <Input
+                    id="poster-upload"
+                    ref={fileInputRef}
+                    type="file"
+                    className="hidden"
+                    accept="image/png, image/jpeg, image/gif"
+                    onChange={handleFileChange}
+                />
+                </div>
+            )}
+            </div>
         </div>
 
 
