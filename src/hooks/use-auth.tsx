@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -56,13 +57,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUserData(null);
       }
       setLoading(false);
+      setAuthChecked(true);
     });
 
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (loading) return;
+    if (!authChecked) return;
 
     const isAuthPage = pathname === "/login" || pathname === "/register";
     const isLandingPage = pathname === "/";
@@ -72,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } else if (user && (isAuthPage || isLandingPage)) {
       router.push("/dashboard");
     }
-  }, [user, loading, pathname, router]);
+  }, [user, authChecked, pathname, router]);
 
 
   const signIn = (email: string, password: string) => {
@@ -86,17 +88,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = () => {
     return firebaseSignOut(auth);
   };
-
-  const isAuthPage = pathname === "/login" || pathname === "/register";
-  const isLandingPage = pathname === "/";
-
-  if (loading && !isAuthPage && !isLandingPage) {
-    return (
+  
+  // Do not render children until authentication status is confirmed
+  if (!authChecked) {
+     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
       </div>
     );
   }
+
 
   return (
     <AuthContext.Provider value={{ user, userData, loading, signIn, signUp, signOut }}>
