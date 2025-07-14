@@ -3,21 +3,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { useAuth } from "@/hooks/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -39,62 +29,55 @@ import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
 import { uploadFile } from "@/lib/firebase/storage";
 
-const eventFormSchema = z.object({
-  title: z.string().min(3, "Title must be at least 3 characters."),
-  description: z.string().min(10, "Description must be at least 10 characters."),
-  date: z.date({ required_error: "A date is required." }),
-  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)."),
-  department: z.string().min(1, "Please select a department."),
-  tags: z.string().optional(),
-  poster: z.any().optional(),
-});
-
-type EventFormValues = z.infer<typeof eventFormSchema>;
-
 export default function AddEventPage() {
   const { user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [time, setTime] = useState("");
+  const [department, setDepartment] = useState("");
+  const [tags, setTags] = useState("");
   const [posterFile, setPosterFile] = useState<File | null>(null);
 
-  const form = useForm<EventFormValues>({
-    resolver: zodResolver(eventFormSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      time: "",
-      department: "",
-      tags: "",
-    },
-  });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-  const onSubmit = async (data: EventFormValues) => {
     if (!user) {
         toast({ title: "Error", description: "You must be logged in to add an event.", variant: "destructive" });
         return;
     }
+
+    if (!title || !description || !date || !time || !department) {
+        toast({ title: "Error", description: "Please fill out all required fields.", variant: "destructive" });
+        return;
+    }
+
     setLoading(true);
+
     try {
       let posterUrl = "https://placehold.co/600x400.png";
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
         posterUrl = await uploadFile(posterFile, posterPath);
       }
-
-      const [hours, minutes] = data.time.split(':');
-      const eventDate = new Date(data.date);
+      
+      const [hours, minutes] = time.split(':');
+      const eventDate = new Date(date);
       eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
 
       const eventData = {
-        title: data.title,
-        description: data.description,
+        title,
+        description,
         date: eventDate,
-        time: data.time,
-        department: data.department,
+        time,
+        department,
         posterUrl,
         createdBy: user.uid,
-        tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
+        tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       };
       
       await addEvent(eventData);
@@ -106,7 +89,7 @@ export default function AddEventPage() {
       router.push("/dashboard");
 
     } catch (error: any) {
-      console.error("Error in onSubmit:", error);
+      console.error("Error in handleSubmit:", error);
       toast({
         title: "Error adding event",
         description: error.message || "An unexpected error occurred.",
@@ -120,150 +103,93 @@ export default function AddEventPage() {
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-4xl font-headline mb-4">Add New Event</h1>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Event Title</FormLabel>
-                    <FormControl>
-                    <Input placeholder="e.g., AI for Beginners" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                <FormItem>
-                    <FormLabel>Event Description</FormLabel>
-                    <FormControl>
-                    <Textarea placeholder="Describe your event..." {...field} />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                    control={form.control}
-                    name="date"
-                    render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                        <FormLabel>Event Date</FormLabel>
-                        <Popover>
-                        <PopoverTrigger asChild>
-                            <FormControl>
-                            <Button
-                                variant={"outline"}
-                                className={cn(
-                                "pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                                )}
-                            >
-                                {field.value ? (
-                                format(field.value, "PPP")
-                                ) : (
-                                <span>Pick a date</span>
-                                )}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                            </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="space-y-2">
+            <Label htmlFor="title">Event Title</Label>
+            <Input id="title" placeholder="e.g., AI for Beginners" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </div>
+
+        <div className="space-y-2">
+            <Label htmlFor="description">Event Description</Label>
+            <Textarea id="description" placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} required />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="flex flex-col space-y-2">
+                <Label>Event Date</Label>
+                <Popover>
+                    <PopoverTrigger asChild>
+                        <Button
+                            variant={"outline"}
+                            className={cn(
+                            "pl-3 text-left font-normal",
+                            !date && "text-muted-foreground"
+                            )}
+                        >
+                            {date ? format(date, "PPP") : <span>Pick a date</span>}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
                             mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
+                            selected={date}
+                            onSelect={setDate}
+                            disabled={(d) => d < new Date(new Date().setHours(0,0,0,0))}
                             initialFocus
-                            />
-                        </PopoverContent>
-                        </Popover>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                 <FormField
-                    control={form.control}
-                    name="time"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Event Time</FormLabel>
-                        <FormControl>
-                        <Input type="time" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+                        />
+                    </PopoverContent>
+                </Popover>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <FormField
-                    control={form.control}
-                    name="department"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Department</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                            <SelectTrigger>
-                            <SelectValue placeholder="Select a department" />
-                            </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                            <SelectItem value="Computer Science">Computer Science</SelectItem>
-                            <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
-                            <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
-                            <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
-                            <SelectItem value="Business Administration">Business Administration</SelectItem>
-                            <SelectItem value="Arts & Humanities">Arts & Humanities</SelectItem>
-                            <SelectItem value="General">General</SelectItem>
-                        </SelectContent>
-                        </Select>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="tags"
-                    render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Tags (comma-separated)</FormLabel>
-                        <FormControl>
-                        <Input placeholder="e.g., tech, workshop, ai" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
-                    )}
-                />
+            <div className="space-y-2">
+                <Label htmlFor="time">Event Time</Label>
+                <Input id="time" type="time" value={time} onChange={(e) => setTime(e.target.value)} required />
             </div>
-            <FormItem>
-                <FormLabel>Event Poster (Optional)</FormLabel>
-                <FormControl>
-                <Input 
-                    type="file" 
-                    accept="image/*"
-                    onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                            setPosterFile(file);
-                        }
-                    }}
-                 />
-                </FormControl>
-                <FormMessage />
-            </FormItem>
-            <Button type="submit" disabled={loading}>
-                {loading ? <Spinner size="sm" /> : "Add Event"}
-            </Button>
-        </form>
-      </Form>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="space-y-2">
+                <Label>Department</Label>
+                <Select onValueChange={setDepartment} value={department}>
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select a department" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="Computer Science">Computer Science</SelectItem>
+                        <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
+                        <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
+                        <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
+                        <SelectItem value="Business Administration">Business Administration</SelectItem>
+                        <SelectItem value="Arts & Humanities">Arts & Humanities</SelectItem>
+                        <SelectItem value="General">General</SelectItem>
+                    </SelectContent>
+                </Select>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="tags">Tags (comma-separated)</Label>
+                <Input id="tags" placeholder="e.g., tech, workshop, ai" value={tags} onChange={(e) => setTags(e.target.value)} />
+            </div>
+        </div>
+
+        <div className="space-y-2">
+            <Label htmlFor="poster">Event Poster (Optional)</Label>
+            <Input 
+                id="poster"
+                type="file" 
+                accept="image/*"
+                onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                        setPosterFile(file);
+                    }
+                }}
+            />
+        </div>
+
+        <Button type="submit" disabled={loading}>
+            {loading ? <Spinner size="sm" /> : "Add Event"}
+        </Button>
+      </form>
     </div>
   );
 }
