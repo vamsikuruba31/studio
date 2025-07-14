@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const [events, setEvents] = useState<EventData[]>([]);
+  const [events, setEvents] = useState<(EventData & { time?: string })[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -54,7 +54,10 @@ export default function DashboardPage() {
           ))}
         </div>
       ) : (
-        <p>No events found. Add a new event to get started!</p>
+        <div className="text-center py-12">
+            <h2 className="text-2xl font-semibold">No Events Found</h2>
+            <p className="text-muted-foreground mt-2">Check back later or add a new event to get started!</p>
+        </div>
       )}
     </div>
   );

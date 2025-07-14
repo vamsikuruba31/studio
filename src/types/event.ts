@@ -6,7 +6,7 @@ export interface EventData {
   id: string;
   title: string;
   description: string;
-  date: Timestamp;
+  date: Timestamp; // Combined date and time
   department: string;
   tags: string[];
   posterUrl: string;
@@ -18,8 +18,7 @@ export interface EventData {
 export interface EventDataInput {
   title: string;
   description: string;
-  date: Date;
-  time: string;
+  date: Date; // The combined Date object from the form
   department: string;
   tags: string[];
   createdBy: string;

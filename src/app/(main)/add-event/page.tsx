@@ -75,11 +75,14 @@ export default function AddEventPage() {
     }
 
     try {
+      const [hours, minutes] = time.split(':').map(Number);
+      const combinedDate = new Date(date);
+      combinedDate.setHours(hours, minutes, 0, 0);
+
       const eventData: EventDataInput = {
         title,
         description,
-        date, 
-        time,
+        date: combinedDate,
         department,
         posterUrl,
         createdBy: user.uid,
