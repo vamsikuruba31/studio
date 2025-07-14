@@ -30,7 +30,11 @@ export default function RegisterPage() {
     setLoading(true);
     try {
       await signUp(email, password);
-      router.push("/dashboard");
+      toast({
+        title: "Account Created",
+        description: "Please log in to continue.",
+      });
+      router.push("/login");
     } catch (error: any) {
       toast({
         title: "Error signing up",
