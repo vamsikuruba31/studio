@@ -57,12 +57,13 @@ export default function RegisterPage() {
         email,
         department,
         year: parseInt(year, 10),
+        isAdmin: true, // Automatically make new user an admin
       });
 
       await signOut(); // Sign out the user immediately
       toast({
         title: "Account Created",
-        description: "Please log in to continue.",
+        description: "Your admin account is ready. Please log in to continue.",
       });
       router.push("/login");
     } catch (error: any) {
@@ -81,7 +82,7 @@ export default function RegisterPage() {
         <CardHeader>
           <CardTitle className="text-2xl font-headline">Sign Up</CardTitle>
           <CardDescription>
-            Enter your information to create an account.
+            Create your admin account.
           </CardDescription>
         </CardHeader>
         <CardContent>
