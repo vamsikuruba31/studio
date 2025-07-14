@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -77,16 +78,22 @@ export default function AddEventPage() {
       const posterPath = `events/${Date.now()}_${data.poster.name}`;
       const posterUrl = await uploadFile(data.poster, posterPath);
 
+      // Combine date and time into a single Date object
+      const [hours, minutes] = data.time.split(':');
+      const eventDate = new Date(data.date);
+      eventDate.setHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
+
       const eventData = {
-        ...data,
+        title: data.title,
+        description: data.description,
+        date: eventDate, // This is now a correct Date object
+        time: data.time,
+        department: data.department,
         posterUrl,
         createdBy: user.uid,
         tags: data.tags ? data.tags.split(',').map(tag => tag.trim()) : [],
       };
       
-      // @ts-ignore
-      delete eventData.poster;
-
       await addEvent(eventData);
 
       toast({
@@ -169,7 +176,7 @@ export default function AddEventPage() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                            disabled={(date) => date < new Date(new Date().setHours(0,0,0,0)) }
                             initialFocus
                             />
                         </PopoverContent>
@@ -264,3 +271,5 @@ export default function AddEventPage() {
     </div>
   );
 }
+
+    

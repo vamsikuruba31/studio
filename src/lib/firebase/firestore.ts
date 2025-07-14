@@ -45,3 +45,5 @@ export const getEvents = async (): Promise<EventData[]> => {
         throw new Error('Could not fetch events.');
     }
 }
+
+    
