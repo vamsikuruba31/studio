@@ -106,10 +106,10 @@ export default function AddEventPage() {
       router.push("/dashboard");
 
     } catch (error: any) {
-      console.error(error);
+      console.error("Error in onSubmit:", error);
       toast({
         title: "Error adding event",
-        description: error.message,
+        description: error.message || "An unexpected error occurred.",
         variant: "destructive",
       });
     } finally {
