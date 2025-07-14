@@ -66,7 +66,6 @@ export default function AddEventPage() {
         if (uploadedUrl) {
             posterUrl = uploadedUrl;
         } else {
-            // Handle case where upload fails but doesn't throw
             throw new Error("Failed to upload poster. Please try again.");
         }
       }
