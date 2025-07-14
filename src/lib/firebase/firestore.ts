@@ -18,7 +18,7 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
   }
 };
 
-export const addEvent = async (eventData: EventDataInput & { posterUrl: string }) => {
+export const addEvent = async (eventData: EventDataInput) => {
     try {
         if (!eventData.date || !eventData.time) {
             throw new Error("Date or time is missing.");

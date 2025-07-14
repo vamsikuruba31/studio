@@ -54,7 +54,6 @@ export default function AddEventPage() {
         return;
     }
     
-    // Strict validation
     if (!title.trim() || !description.trim() || !date || !time || !department) {
         toast({ title: "Validation Error", description: "Please fill out all required fields, including date and time.", variant: "destructive" });
         setLoading(false);
@@ -69,7 +68,7 @@ export default function AddEventPage() {
         posterUrl = await uploadFile(posterFile, posterPath);
       }
       
-      const eventData: EventDataInput & { posterUrl: string } = {
+      const eventData: EventDataInput = {
         title,
         description,
         date, 

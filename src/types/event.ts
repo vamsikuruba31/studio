@@ -23,4 +23,5 @@ export interface EventDataInput {
   department: string;
   tags: string[];
   createdBy: string;
+  posterUrl: string;
 }
