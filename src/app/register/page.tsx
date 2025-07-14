@@ -39,10 +39,10 @@ export default function RegisterPage() {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!year) {
+    if (!department || !year) {
       toast({
         title: "Incomplete Form",
-        description: "Please select your year.",
+        description: "Please select your department and year.",
         variant: "destructive",
       });
       return;
@@ -110,13 +110,19 @@ export default function RegisterPage() {
               </div>
                <div className="grid gap-2">
                 <Label htmlFor="department">Department</Label>
-                <Input
-                  id="department"
-                  placeholder="e.g. Computer Science"
-                  required
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                />
+                 <Select onValueChange={setDepartment} value={department}>
+                  <SelectTrigger id="department">
+                    <SelectValue placeholder="Select your department" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Computer Science">Computer Science</SelectItem>
+                    <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
+                    <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
+                    <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
+                    <SelectItem value="Business Administration">Business Administration</SelectItem>
+                    <SelectItem value="Arts & Humanities">Arts & Humanities</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
                <div className="grid gap-2">
                 <Label htmlFor="year">Year</Label>
