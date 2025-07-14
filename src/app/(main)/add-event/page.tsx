@@ -169,8 +169,8 @@ export default function AddEventPage() {
                       <Image
                         src={posterPreview}
                         alt="Poster preview"
-                        layout="fill"
-                        objectFit="contain"
+                        fill
+                        style={{ objectFit: "contain" }}
                         className="rounded-md"
                       />
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -259,5 +259,3 @@ export default function AddEventPage() {
     </div>
   );
 }
-
-    

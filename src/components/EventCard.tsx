@@ -32,6 +32,7 @@ export function EventCard({ event }: EventCardProps) {
                 src={event.posterUrl}
                 alt={event.title}
                 fill
+                sizes="100vw"
                 className="object-cover rounded-t-lg"
                 data-ai-hint="event poster"
             />
