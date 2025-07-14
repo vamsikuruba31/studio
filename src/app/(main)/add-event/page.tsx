@@ -21,7 +21,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Sparkles } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -63,7 +63,7 @@ export default function AddEventPage() {
       
       if (posterFile) {
         const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
-        posterUrl = await uploadFile(posterFile, posterPath);
+        posterUrl = await uploadFile(posterFile, posterPath, user);
       }
       
       const eventData = {
