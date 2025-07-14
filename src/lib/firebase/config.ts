@@ -13,6 +13,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Check if the config is loaded
+if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
+  console.error("Firebase config is missing or incomplete. Check your .env file and restart the server.");
+}
+
 // Initialize Firebase for SSR
 const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
