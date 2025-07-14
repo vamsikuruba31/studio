@@ -64,14 +64,15 @@ export default function AddEventPage() {
 
     if (posterFile) {
         try {
+            console.log("Uploading file:", posterFile.name);
             const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
             posterUrl = await uploadFile(posterFile, posterPath);
-            console.log("✅ Poster uploaded:", posterUrl);
-        } catch (err) {
-            console.error("❌ Poster Upload Failed:", err);
+            console.log("✅ Poster URL received:", posterUrl);
+        } catch (err: any) {
+            console.error("❌ Poster upload failed:", err);
             toast({
                 title: "Poster Upload Failed",
-                description: "Please try uploading a different image.",
+                description: err.message || "Please try again.",
                 variant: "destructive",
             });
             setLoading(false);
@@ -80,24 +81,22 @@ export default function AddEventPage() {
     }
 
     try {
-      const [hours, minutes] = time.split(':').map(Number);
-      const combinedDate = new Date(date);
-      combinedDate.setHours(hours, minutes, 0, 0);
-
       const eventData: EventDataInput = {
         title,
         description,
-        date: combinedDate,
+        date,
+        time,
         department,
         posterUrl,
         createdBy: user.uid,
         tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       };
       
-      console.log("📦 Final poster URL:", posterUrl);
-      console.log("📄 Event Data:", eventData);
+      console.log("📦 Final event data before submit:", eventData);
       
       await addEvent(eventData);
+
+      console.log("✅ Event successfully added.");
 
       toast({
         title: "Success!",

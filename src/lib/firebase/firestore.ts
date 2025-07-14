@@ -20,15 +20,21 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
 
 export const addEvent = async (eventData: EventDataInput) => {
     try {
-        if (!eventData.date) {
-            throw new Error("Date is missing.");
+        const { date, time, ...rest } = eventData;
+        
+        if (!date || !time) {
+            throw new Error("Date or time is missing.");
         }
         
+        const [hours, minutes] = time.split(':').map(Number);
+        const combinedDate = new Date(date);
+        combinedDate.setHours(hours, minutes, 0, 0);
+
         const eventCollection = collection(db, 'events');
         
         const dataToSave = {
-            ...eventData,
-            date: Timestamp.fromDate(eventData.date), 
+            ...rest,
+            date: Timestamp.fromDate(combinedDate), 
             createdAt: serverTimestamp(),
         };
 

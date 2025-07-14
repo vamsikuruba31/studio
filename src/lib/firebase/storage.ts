@@ -15,7 +15,7 @@ export async function uploadFile(file: File, path: string): Promise<string> {
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
     } catch (error) {
-        console.error("❌ Image Upload Error:", error);
-        throw new Error("Image upload failed. Please try again.");
+        console.error("🔥 uploadFile error:", error);
+        throw error;
     }
 }
