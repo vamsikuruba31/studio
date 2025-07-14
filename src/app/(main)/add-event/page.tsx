@@ -61,16 +61,10 @@ export default function AddEventPage() {
     try {
       let posterUrl = "https://placehold.co/600x400.png";
       
-      // The definitive fix: Only call uploadFile if a file has actually been selected.
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
         const uploadedUrl = await uploadFile(posterFile, posterPath);
-        if (uploadedUrl) {
-          posterUrl = uploadedUrl;
-        } else {
-           // This case should not be hit with the corrected uploadFile function, but it's good practice.
-           throw new Error("File upload returned no URL.");
-        }
+        posterUrl = uploadedUrl; // This will now receive the correct URL
       }
       
       const [hours, minutes] = time.split(':');
@@ -97,8 +91,7 @@ export default function AddEventPage() {
       router.push("/dashboard");
 
     } catch (error: any) {
-      // Added console.error for easier debugging
-      console.error("Error in handleSubmit:", error);
+      console.error("Error adding event:", error);
       toast({
         title: "Error adding event",
         description: error.message || "An unexpected error occurred.",
