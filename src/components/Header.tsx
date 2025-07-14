@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -16,7 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Building, LogOut, PlusCircle } from "lucide-react";
 
 export function Header() {
-  const { user, signOut } = useAuth();
+  const { user, userData, signOut } = useAuth();
   const router = useRouter();
 
   const handleSignOut = async () => {
@@ -40,7 +41,7 @@ export function Header() {
         </Link>
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-6 text-sm font-medium">
-             {user && (
+             {userData?.isAdmin && (
               <Button asChild variant="ghost" size="sm">
                 <Link href="/add-event">
                   <PlusCircle className="mr-2 h-4 w-4" />
@@ -63,7 +64,7 @@ export function Header() {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {user.displayName || 'User'}
+                      {userData?.name || 'User'}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
                       {user.email}

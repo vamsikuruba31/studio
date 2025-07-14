@@ -8,4 +8,5 @@ export interface UserData {
   department: string;
   year: number;
   joinedAt: Timestamp;
+  isAdmin?: boolean;
 }

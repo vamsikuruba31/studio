@@ -62,7 +62,11 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       if (posterFile) {
         const posterPath = `events/${Date.now()}_${posterFile.name}`;
-        posterUrl = await uploadFile(posterFile, posterPath);
+        // uploadFile now correctly handles the possibility of a null file
+        const uploadedUrl = await uploadFile(posterFile, posterPath);
+        if (uploadedUrl) {
+            posterUrl = uploadedUrl;
+        }
       }
       
       const [hours, minutes] = time.split(':');
@@ -72,7 +76,7 @@ export default function AddEventPage() {
       const eventData = {
         title,
         description,
-        date: eventDate, // Pass the JS Date object directly
+        date: eventDate,
         time,
         department,
         posterUrl,
@@ -150,7 +154,7 @@ export default function AddEventPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-2">
                 <Label>Department</Label>
-                <Select onValueChange={setDepartment} value={department}>
+                <Select onValueChange={setDepartment} value={department} required>
                     <SelectTrigger>
                         <SelectValue placeholder="Select a department" />
                     </SelectTrigger>
