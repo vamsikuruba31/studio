@@ -60,14 +60,21 @@ export default function AddEventPage() {
         return;
     }
 
+    let posterUrl = "https://placehold.co/600x400.png";
+
+    if (posterFile) {
+        try {
+            const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
+            posterUrl = await uploadFile(posterFile, posterPath);
+        } catch (err) {
+            console.error("Image upload failed:", err);
+            toast({ title: "Poster Upload Failed", description: "Could not upload the event poster. Please try again.", variant: "destructive" });
+            setLoading(false);
+            return;
+        }
+    }
+
     try {
-      let posterUrl = "https://placehold.co/600x400.png";
-      
-      if (posterFile) {
-        const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
-        posterUrl = await uploadFile(posterFile, posterPath);
-      }
-      
       const eventData: EventDataInput = {
         title,
         description,
