@@ -1,6 +1,6 @@
 import { doc, setDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
 import type { UserData } from '@/types/user';
-import type { EventData } from '@/types/event';
+import type { EventData, EventDataInput } from '@/types/event';
 import { db } from './config';
 
 export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | 'joinedAt'>) => {
@@ -17,11 +17,12 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
   }
 };
 
-export const addEvent = async (eventData: Omit<EventData, 'id' | 'createdAt'>) => {
+export const addEvent = async (eventData: EventDataInput) => {
     try {
         const eventCollection = collection(db, 'events');
         await addDoc(eventCollection, {
             ...eventData,
+            date: Timestamp.fromDate(eventData.date), // Convert JS Date to Firestore Timestamp here
             createdAt: serverTimestamp(),
         });
     } catch (error) {

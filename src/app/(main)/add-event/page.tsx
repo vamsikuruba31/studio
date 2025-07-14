@@ -28,7 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
 import { uploadFile } from "@/lib/firebase/storage";
-import { Timestamp } from "firebase/firestore";
 
 export default function AddEventPage() {
   const { user } = useAuth();
@@ -73,7 +72,7 @@ export default function AddEventPage() {
       const eventData = {
         title,
         description,
-        date: Timestamp.fromDate(eventDate),
+        date: eventDate, // Pass the JS Date object directly
         time,
         department,
         posterUrl,
@@ -159,7 +158,6 @@ export default function AddEventPage() {
                         <SelectItem value="Computer Science">Computer Science</SelectItem>
                         <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
                         <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
-                        <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
                         <SelectItem value="Business Administration">Business Administration</SelectItem>
                         <SelectItem value="Arts & Humanities">Arts & Humanities</SelectItem>
                         <SelectItem value="General">General</SelectItem>
