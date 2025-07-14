@@ -20,11 +20,14 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
 export const addEvent = async (eventData: EventDataInput) => {
     try {
         const eventCollection = collection(db, 'events');
-        await addDoc(eventCollection, {
+        // Convert the JS Date object to a Firestore Timestamp before sending.
+        // This is the most reliable way and fixes the hanging issue.
+        const dataWithTimestamp = {
             ...eventData,
-            date: Timestamp.fromDate(eventData.date), // Convert JS Date to Firestore Timestamp here
+            date: Timestamp.fromDate(eventData.date),
             createdAt: serverTimestamp(),
-        });
+        };
+        await addDoc(eventCollection, dataWithTimestamp);
     } catch (error) {
         console.error('Error adding event to Firestore: ', error);
         throw new Error('Could not create event.');
