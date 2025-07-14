@@ -8,15 +8,14 @@ import { storage } from './config';
  * @param path The path in Firebase Storage where the file will be stored.
  * @returns A promise that resolves with the public download URL of the file.
  */
-export const uploadFile = async (file: File, path: string): Promise<string> => {
-  if (!file) {
-    throw new Error("No file provided for upload.");
-  }
-  const storageRef = ref(storage, path);
-  
-  await uploadBytes(storageRef, file);
-  
-  const downloadURL = await getDownloadURL(storageRef);
-  
-  return downloadURL;
-};
+export async function uploadFile(file: File, path: string): Promise<string> {
+    try {
+        const fileRef = ref(storage, path);
+        const snapshot = await uploadBytes(fileRef, file);
+        const downloadURL = await getDownloadURL(snapshot.ref);
+        return downloadURL;
+    } catch (error) {
+        console.error("❌ Image Upload Error:", error);
+        throw new Error("Image upload failed. Please try again.");
+    }
+}

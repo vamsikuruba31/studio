@@ -66,9 +66,14 @@ export default function AddEventPage() {
         try {
             const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
             posterUrl = await uploadFile(posterFile, posterPath);
+            console.log("✅ Poster uploaded:", posterUrl);
         } catch (err) {
-            console.error("Image upload failed:", err);
-            toast({ title: "Poster Upload Failed", description: "Could not upload the event poster. Please try again.", variant: "destructive" });
+            console.error("❌ Poster Upload Failed:", err);
+            toast({
+                title: "Poster Upload Failed",
+                description: "Please try uploading a different image.",
+                variant: "destructive",
+            });
             setLoading(false);
             return;
         }
@@ -88,6 +93,9 @@ export default function AddEventPage() {
         createdBy: user.uid,
         tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       };
+      
+      console.log("📦 Final poster URL:", posterUrl);
+      console.log("📄 Event Data:", eventData);
       
       await addEvent(eventData);
 
