@@ -10,8 +10,8 @@ import { storage } from './config';
  */
 export async function uploadFile(file: File, path: string): Promise<string> {
     try {
-        const fileRef = ref(storage, path);
-        const snapshot = await uploadBytes(fileRef, file);
+        const storageRef = ref(storage, path);
+        const snapshot = await uploadBytes(storageRef, file);
         const downloadURL = await getDownloadURL(snapshot.ref);
         return downloadURL;
     } catch (error: any) {
