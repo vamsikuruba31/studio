@@ -22,6 +22,7 @@ export const addEvent = async (eventData: EventDataInput) => {
     try {
         const eventCollection = collection(db, 'events');
         
+        // Correctly convert the JS Date to a Firestore Timestamp before saving.
         const dataToSave = {
             ...eventData,
             date: Timestamp.fromDate(eventData.date), 
