@@ -1,27 +1,17 @@
-"use client";
-
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/use-auth';
-import { Spinner } from '@/components/Spinner';
-
 export default function Home() {
-  const { user, loading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!loading) {
-      if (user) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/login');
-      }
-    }
-  }, [user, loading, router]);
-
   return (
-    <div className="flex h-screen items-center justify-center">
-      <Spinner size="lg" />
-    </div>
+    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold tracking-tight text-primary sm:text-6xl">
+          CampusConnect
+        </h1>
+        <p className="mt-6 text-lg leading-8 text-muted-foreground">
+          Let's build your smart campus event platform together.
+        </p>
+        <div className="mt-10">
+          <p className="text-foreground">What would you like to build first?</p>
+        </div>
+      </div>
+    </main>
   );
 }
