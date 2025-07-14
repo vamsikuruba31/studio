@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
 import { addEvent } from "@/lib/firebase/firestore";
 import { uploadFile } from "@/lib/firebase/storage";
+import { Timestamp } from "firebase/firestore";
 
 export default function AddEventPage() {
   const { user } = useAuth();
@@ -72,7 +73,7 @@ export default function AddEventPage() {
       const eventData = {
         title,
         description,
-        date: eventDate,
+        date: Timestamp.fromDate(eventDate),
         time,
         department,
         posterUrl,

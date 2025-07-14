@@ -17,7 +17,7 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
   }
 };
 
-export const addEvent = async (eventData: Omit<EventData, 'id' | 'createdAt' | 'date'> & { date: Date }) => {
+export const addEvent = async (eventData: Omit<EventData, 'id' | 'createdAt'>) => {
     try {
         const eventCollection = collection(db, 'events');
         await addDoc(eventCollection, {
@@ -45,5 +45,3 @@ export const getEvents = async (): Promise<EventData[]> => {
         throw new Error('Could not fetch events.');
     }
 }
-
-    
