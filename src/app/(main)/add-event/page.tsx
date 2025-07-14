@@ -100,9 +100,10 @@ export default function AddEventPage() {
             const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
             posterUrl = await uploadFile(posterFile, posterPath);
         } catch (err: any) {
+            console.error("🔥 Poster Upload Failed:", err);
             toast({
                 title: "Poster Upload Failed",
-                description: err.message || "An unexpected error occurred during upload. Please try again.",
+                description: err.message || "An unexpected error occurred during upload. Please check the console and your storage rules.",
                 variant: "destructive",
             });
             setLoading(false);
@@ -170,8 +171,8 @@ export default function AddEventPage() {
                         src={posterPreview}
                         alt="Poster preview"
                         fill
-                        style={{ objectFit: "contain" }}
-                        className="rounded-md"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="rounded-md object-contain"
                       />
                       <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                          <Button type="button" size="icon" variant="destructive" onClick={handleRemovePoster}>
