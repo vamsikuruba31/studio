@@ -43,6 +43,7 @@ export default function AddEventPage() {
   const [time, setTime] = useState("");
   const [department, setDepartment] = useState("");
   const [tags, setTags] = useState("");
+  const [posterUrl, setPosterUrl] = useState("");
   
   const [generatingCaption, setGeneratingCaption] = useState(false);
   const [suggestedCaption, setSuggestedCaption] = useState("");
@@ -88,8 +89,7 @@ export default function AddEventPage() {
     setLoading(true);
 
     try {
-      // Use a placeholder URL since file upload is disabled due to CORS
-      const posterUrl = "https://placehold.co/600x400.png";
+      const finalPosterUrl = posterUrl.trim() ? posterUrl : "https://placehold.co/600x400.png";
 
       const [hours, minutes] = time.split(':').map(Number);
       const combinedDate = new Date(date);
@@ -100,7 +100,7 @@ export default function AddEventPage() {
         description,
         date: combinedDate,
         department,
-        posterUrl,
+        posterUrl: finalPosterUrl,
         createdBy: user.uid,
         tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
       };
@@ -156,6 +156,15 @@ export default function AddEventPage() {
                 </Alert>
             )}
         </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="posterUrl">Event Poster URL</Label>
+          <Input id="posterUrl" placeholder="https://example.com/poster.png" value={posterUrl} onChange={(e) => setPosterUrl(e.target.value)} />
+           <p className="text-sm text-muted-foreground">
+            Paste a link to an image. If left blank, a default image will be used.
+          </p>
+        </div>
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="flex flex-col space-y-2">
