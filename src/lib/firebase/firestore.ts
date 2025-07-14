@@ -19,13 +19,22 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
 
 export const addEvent = async (eventData: EventDataInput) => {
     try {
+        if (!eventData.date || !eventData.time) {
+            throw new Error("Date or time is missing.");
+        }
+        
+        const [hours, minutes] = eventData.time.split(':');
+        const combinedDate = new Date(eventData.date);
+        combinedDate.setHours(parseInt(hours, 10));
+        combinedDate.setMinutes(parseInt(minutes, 10));
+
         const eventCollection = collection(db, 'events');
-        const dataWithTimestamp = {
+        const dataToSave = {
             ...eventData,
-            date: Timestamp.fromDate(eventData.date),
+            date: Timestamp.fromDate(combinedDate), // Convert to Firestore Timestamp here
             createdAt: serverTimestamp(),
         };
-        await addDoc(eventCollection, dataWithTimestamp);
+        await addDoc(eventCollection, dataToSave);
     } catch (error) {
         console.error('Error adding event to Firestore: ', error);
         throw new Error('Could not create event.');
