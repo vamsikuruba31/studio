@@ -1,13 +1,16 @@
-
 rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow anyone to read files (e.g., view event posters).
-    // Only allow authenticated users to write files.
+    // Allow public read access to all files
     match /{allPaths=**} {
-      allow read: if true;
-      allow write: if request.auth != null;
+      allow read;
+    }
+
+    // Allow authenticated users to write to the 'events' folder.
+    // Restrict writes to a path that includes their own user ID.
+    match /events/{userId}/{allPaths=**} {
+      allow write: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
