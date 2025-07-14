@@ -1,19 +1,21 @@
-
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read and write to their own user document
+    // Users can read any profile, but only write to their own.
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && request.auth.uid == userId;
+      // Deletes are disallowed for this app's logic
+      allow delete: if false;
     }
-
-    // Any authenticated user can create an event
-    // Anyone (even unauthenticated users) can read events
+    
+    // Anyone can read events.
+    // Only authenticated users can create events.
     match /events/{eventId} {
       allow read: if true;
       allow create: if request.auth != null;
-      // Only the user who created the event can update or delete it
+      // Only the user who created an event can update or delete it (future-proofing).
       allow update, delete: if request.auth != null && resource.data.createdBy == request.auth.uid;
     }
   }
