@@ -63,7 +63,7 @@ export default function AddEventPage() {
       
       if (posterFile) {
         const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
-        posterUrl = await uploadFile(posterFile, posterPath, user);
+        posterUrl = await uploadFile(posterFile, posterPath);
       }
       
       const eventData = {
