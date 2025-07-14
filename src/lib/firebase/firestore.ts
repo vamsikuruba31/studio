@@ -29,13 +29,15 @@ export const addEvent = async (eventData: EventDataInput) => {
         combinedDate.setMinutes(parseInt(minutes, 10));
 
         const eventCollection = collection(db, 'events');
-        const dataToSave = {
+        
+        const dataToSave: Omit<EventDataInput, 'time' | 'date'> & { date: Timestamp, createdAt: any } = {
             ...eventData,
             date: Timestamp.fromDate(combinedDate), 
             createdAt: serverTimestamp(),
         };
         // Remove time property as it's merged into date
         delete (dataToSave as Partial<EventDataInput>).time;
+
 
         await addDoc(eventCollection, dataToSave);
     } catch (error) {
