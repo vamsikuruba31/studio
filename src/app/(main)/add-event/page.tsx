@@ -46,7 +46,7 @@ const eventFormSchema = z.object({
   time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:MM)."),
   department: z.string().min(1, "Please select a department."),
   tags: z.string().optional(),
-  poster: z.instanceof(File).optional(),
+  poster: z.any().optional(),
 });
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
@@ -56,6 +56,7 @@ export default function AddEventPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
 
   const form = useForm<EventFormValues>({
     resolver: zodResolver(eventFormSchema),
@@ -76,9 +77,9 @@ export default function AddEventPage() {
     setLoading(true);
     try {
       let posterUrl = "https://placehold.co/600x400.png";
-      if (data.poster && data.poster.size > 0) {
-        const posterPath = `events/${Date.now()}_${data.poster.name}`;
-        posterUrl = await uploadFile(data.poster, posterPath);
+      if (posterFile) {
+        const posterPath = `events/${Date.now()}_${posterFile.name}`;
+        posterUrl = await uploadFile(posterFile, posterPath);
       }
 
       const [hours, minutes] = data.time.split(':');
@@ -242,29 +243,22 @@ export default function AddEventPage() {
                     )}
                 />
             </div>
-            <FormField
-                control={form.control}
-                name="poster"
-                render={({ field: { onChange, value, ...rest } }) => (
-                <FormItem>
-                    <FormLabel>Event Poster (Optional)</FormLabel>
-                    <FormControl>
-                    <Input 
-                        type="file" 
-                        accept="image/*"
-                        onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                                onChange(file);
-                            }
-                        }}
-                        {...rest}
-                     />
-                    </FormControl>
-                    <FormMessage />
-                </FormItem>
-                )}
-            />
+            <FormItem>
+                <FormLabel>Event Poster (Optional)</FormLabel>
+                <FormControl>
+                <Input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                            setPosterFile(file);
+                        }
+                    }}
+                 />
+                </FormControl>
+                <FormMessage />
+            </FormItem>
             <Button type="submit" disabled={loading}>
                 {loading ? <Spinner size="sm" /> : "Add Event"}
             </Button>
