@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -16,10 +17,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
+import { addUser } from "@/lib/firebase/firestore";
 
 export default function RegisterPage() {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [department, setDepartment] = useState("");
+  const [year, setYear] = useState("");
   const [loading, setLoading] = useState(false);
   const { signUp, signOut } = useAuth();
   const router = useRouter();
@@ -29,7 +34,16 @@ export default function RegisterPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await signUp(email, password);
+      const userCredential = await signUp(email, password);
+      const user = userCredential.user;
+      
+      await addUser(user.uid, {
+        name,
+        email,
+        department,
+        year: parseInt(year, 10),
+      });
+
       await signOut(); // Sign out the user immediately
       toast({
         title: "Account Created",
@@ -59,6 +73,16 @@ export default function RegisterPage() {
           <form onSubmit={handleSignUp}>
             <div className="grid gap-4">
               <div className="grid gap-2">
+                <Label htmlFor="name">Full Name</Label>
+                <Input
+                  id="name"
+                  placeholder="John Doe"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </div>
+              <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -67,6 +91,27 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+               <div className="grid gap-2">
+                <Label htmlFor="department">Department</Label>
+                <Input
+                  id="department"
+                  placeholder="e.g. Computer Science"
+                  required
+                  value={department}
+                  onChange={(e) => setDepartment(e.target.value)}
+                />
+              </div>
+               <div className="grid gap-2">
+                <Label htmlFor="year">Year</Label>
+                <Input
+                  id="year"
+                  type="number"
+                  placeholder="e.g. 2024"
+                  required
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">

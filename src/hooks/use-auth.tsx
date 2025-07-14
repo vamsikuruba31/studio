@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -13,6 +14,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
+  UserCredential,
 } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
 import { useRouter, usePathname } from "next/navigation";
@@ -21,8 +23,8 @@ import { Spinner } from "@/components/Spinner";
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<any>;
-  signUp: (email: string, password: string) => Promise<any>;
+  signIn: (email: string, password: string) => Promise<UserCredential>;
+  signUp: (email: string, password: string) => Promise<UserCredential>;
   signOut: () => Promise<void>;
 }
 
@@ -47,10 +49,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (loading) return;
 
     const isAuthPage = pathname === "/login" || pathname === "/register";
+    const isLandingPage = pathname === "/";
     
-    if (!user && !isAuthPage) {
+    if (!user && !isAuthPage && !isLandingPage) {
       router.push("/login");
-    } else if (user && isAuthPage) {
+    } else if (user && (isAuthPage || isLandingPage)) {
       router.push("/dashboard");
     }
   }, [user, loading, pathname, router]);
@@ -68,7 +71,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return firebaseSignOut(auth);
   };
 
-  if (loading) {
+  const isAuthPage = pathname === "/login" || pathname === "/register";
+  const isLandingPage = pathname === "/";
+
+  if (loading && !isAuthPage && !isLandingPage) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Spinner size="lg" />
