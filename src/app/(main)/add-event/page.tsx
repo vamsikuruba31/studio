@@ -62,7 +62,7 @@ export default function AddEventPage() {
       let posterUrl = "https://placehold.co/600x400.png";
       
       if (posterFile) {
-        const posterPath = `events/${user.uid}/${Date.now()}_${posterFile.name}`;
+        const posterPath = `posters/${Date.now()}_${posterFile.name}`;
         posterUrl = await uploadFile(posterFile, posterPath, user);
       }
       
