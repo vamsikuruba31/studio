@@ -1,3 +1,4 @@
+
 import { doc, setDoc, addDoc, collection, serverTimestamp, getDocs, query, orderBy, Timestamp } from 'firebase/firestore';
 import type { UserData } from '@/types/user';
 import type { EventData, EventDataInput } from '@/types/event';
@@ -17,7 +18,7 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
   }
 };
 
-export const addEvent = async (eventData: EventDataInput) => {
+export const addEvent = async (eventData: EventDataInput & { posterUrl: string }) => {
     try {
         if (!eventData.date || !eventData.time) {
             throw new Error("Date or time is missing.");
@@ -30,7 +31,7 @@ export const addEvent = async (eventData: EventDataInput) => {
 
         const eventCollection = collection(db, 'events');
         
-        const { time, ...restOfEventData } = eventData;
+        const { time, date, ...restOfEventData } = eventData;
 
         const dataToSave = {
             ...restOfEventData,

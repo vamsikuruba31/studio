@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 // This is the shape of the data stored in Firestore
@@ -6,7 +7,6 @@ export interface EventData {
   title: string;
   description: string;
   date: Timestamp;
-  time: string;
   department: string;
   tags: string[];
   posterUrl: string;
@@ -22,6 +22,5 @@ export interface EventDataInput {
   time: string;
   department: string;
   tags: string[];
-  posterUrl: string;
   createdBy: string;
 }
