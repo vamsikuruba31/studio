@@ -69,7 +69,7 @@ export default function AddEventPage() {
         } catch (err: any) {
             toast({
                 title: "Poster Upload Failed",
-                description: err.message || "Please try again.",
+                description: err.message || "An unexpected error occurred. Please try again.",
                 variant: "destructive",
             });
             setLoading(false);

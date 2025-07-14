@@ -15,7 +15,7 @@ const firebaseConfig = {
 
 // Check if the config is loaded
 if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error("Firebase config is missing or incomplete. Check your .env file and restart the server.");
+  throw new Error("Firebase config is missing or incomplete. Check your .env file and restart the server.");
 }
 
 // Initialize Firebase for SSR
