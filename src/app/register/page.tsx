@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
-import { addUser } from "@/lib/firebase/firestore";
+// server-backed signup will create user and profile
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -49,29 +49,24 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      const userCredential = await signUp(email, password);
-      const user = userCredential.user;
-      
-      await addUser(user.uid, {
-        name,
-        email,
-        department,
-        year: parseInt(year, 10),
-        isAdmin: true, // Automatically make new user an admin
-      });
+      const resp = await signUp({ name, email, password, department, year: parseInt(year, 10), isAdmin: true });
+      console.log('signup resp', resp);
 
-      await signOut(); // Sign out the user immediately
+      // Ensure token not stored and user not logged in locally
+      await signOut();
       toast({
         title: "Account Created",
         description: "Your admin account is ready. Please log in to continue.",
       });
       router.push("/login");
     } catch (error: any) {
+      console.error('signup error', error);
       toast({
         title: "Error signing up",
-        description: error.message,
+        description: error.message || 'Signup failed',
         variant: "destructive",
       });
+    } finally {
       setLoading(false);
     }
   };

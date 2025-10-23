@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Spinner } from "@/components/Spinner";
-import { FirebaseError } from "firebase/app";
+// Using server-side auth endpoints; errors are returned as JSON
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -34,25 +34,9 @@ export default function LoginPage() {
       await signIn(email, password);
       router.push("/dashboard");
     } catch (error: any) {
-       let description = "An unexpected error occurred. Please try again.";
-       if (error instanceof FirebaseError) {
-        switch (error.code) {
-          case 'auth/user-not-found':
-          case 'auth/wrong-password':
-          case 'auth/invalid-credential':
-            description = "Invalid email or password. Please try again.";
-            break;
-          case 'auth/invalid-email':
-            description = "The email address is not valid.";
-            break;
-          default:
-            description = error.message;
-            break;
-        }
-      }
       toast({
         title: "Error signing in",
-        description: description,
+        description: error?.message || 'An unexpected error occurred. Please try again.',
         variant: "destructive",
       });
     } finally {

@@ -20,46 +20,26 @@ export const addUser = async (userId: string, userData: Omit<UserData, 'uid' | '
 
 export const addEvent = async (eventData: EventDataInput) => {
     try {
-        const eventCollection = collection(db, 'events');
-        
-        // Correctly convert the JS Date to a Firestore Timestamp before saving.
-        const dataToSave = {
-            ...eventData,
-            date: Timestamp.fromDate(eventData.date), 
-            createdAt: serverTimestamp(),
-        };
-
-        await addDoc(eventCollection, dataToSave);
+        const res = await fetch('/api/events', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(eventData) });
+        if (!res.ok) {
+            const body = await res.json().catch(() => ({}));
+            throw new Error(body?.error || 'Could not create event.');
+        }
+        return await res.json();
     } catch (error) {
-        console.error('Error adding event to Firestore: ', error);
-        throw new Error('Could not create event.');
+        console.error('Error adding event: ', error);
+        throw error;
     }
 }
 
 export const getEvents = async (): Promise<EventData[]> => {
     try {
-        const eventsCollection = collection(db, 'events');
-        const q = query(eventsCollection, orderBy('date', 'asc'));
-        const querySnapshot = await getDocs(q);
-
-        const events = querySnapshot.docs.map(doc => {
-            const data = doc.data();
-            // Firestore timestamps need to be converted to JS Date objects
-            const date = (data.date as Timestamp).toDate();
-            return {
-                id: doc.id,
-                title: data.title,
-                description: data.description,
-                date: date, // Keep as a Date object
-                department: data.department,
-                tags: data.tags,
-                posterUrl: data.posterUrl,
-                createdBy: data.createdBy,
-                createdAt: (data.createdAt as Timestamp).toDate(),
-            } as EventData;
-        });
-
-        return events;
+        const res = await fetch('/api/events');
+        if (!res.ok) {
+            throw new Error('Could not fetch events');
+        }
+        const json = await res.json();
+        return json.events as EventData[];
     } catch (error) {
         console.error('Error getting events: ', error);
         throw new Error('Could not fetch events.');

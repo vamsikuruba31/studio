@@ -63,7 +63,8 @@ export function Header() {
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.photoURL ?? ""} alt={user.email ?? ""} />
+                    {/* No photo field in the local user object; use empty src so AvatarFallback shows initials */}
+                    <AvatarImage src={""} alt={user.email ?? ""} />
                     <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
                   </Avatar>
                 </Button>

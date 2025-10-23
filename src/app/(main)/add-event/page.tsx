@@ -99,6 +99,28 @@ export default function AddEventPage() {
     }
   };
 
+    const handleGenerateEvent = () => {
+        const sampleTitle = "AI Workshop: Intro to ML";
+        const sampleDescription = "Hands-on workshop covering the fundamentals of machine learning, practical demos, and Q&A.";
+        const sampleDate = new Date();
+        sampleDate.setDate(sampleDate.getDate() + 7); // one week from now
+        const sampleTime = "15:30";
+        const sampleDepartment = "Computer Science";
+        const sampleTags = "ai,workshop,machine learning";
+        const placeholderImage = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAABccqhmAAAACXBIWXMAAAsTAAALEwEAmpwYAAABKElEQVR4nO3BAQ0AAADCoPdPbQ43oAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOAdW5AAAX6B6uQAAAAASUVORK5CYII=";
+
+        setTitle(sampleTitle);
+        setDescription(sampleDescription);
+        setDate(sampleDate);
+        setTime(sampleTime);
+        setDepartment(sampleDepartment);
+        setTags(sampleTags);
+        setPosterFile(null);
+        setPosterPreview(placeholderImage);
+        // optionally set suggested caption
+        setSuggestedCaption(`${sampleTitle} — ${sampleDescription.substring(0, 80)}...`);
+    };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -171,11 +193,16 @@ export default function AddEventPage() {
             <Textarea id="description" placeholder="Describe your event..." value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         
-        <div className="space-y-4">
-            <Button type="button" variant="outline" onClick={handleSuggestCaption} disabled={generatingCaption}>
-                {generatingCaption ? <Spinner size="sm" /> : <Sparkles className="mr-2 h-4 w-4" />}
-                Suggest a Catchy Caption
-            </Button>
+                <div className="space-y-4">
+                        <div className="flex items-center gap-3">
+                            <Button type="button" variant="outline" onClick={handleSuggestCaption} disabled={generatingCaption}>
+                                    {generatingCaption ? <Spinner size="sm" /> : <Sparkles className="mr-2 h-4 w-4" />}
+                                    Suggest a Catchy Caption
+                            </Button>
+                            <Button type="button" variant="secondary" onClick={handleGenerateEvent}>
+                                Generate Event
+                            </Button>
+                        </div>
             {suggestedCaption && (
                 <Alert>
                     <Sparkles className="h-4 w-4" />
